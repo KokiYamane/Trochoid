@@ -1,0 +1,6 @@
+autopep8
+numpy
+matplotlib
+seaborn
+pandas
+solidpython==1.1.1

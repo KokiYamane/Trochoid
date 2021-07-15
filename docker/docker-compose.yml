@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  open_scad:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/root/workspace/
+    stdin_open: true
