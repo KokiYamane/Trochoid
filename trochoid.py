@@ -30,32 +30,32 @@ def trochoid(theta, r, teeth):
         return hypercycloid(theta, r, r_m, r_m)
 
 
-def make_trochoid_gear(r, teeth):
+def make_trochoid_gear(r, teeth, height):
     thetas = np.arange(0, 2 * np.pi, 2 * np.pi / 200)
     x_list, y_list = np.array([trochoid(theta, r, teeth)
                                for theta in thetas]).transpose()
     points = [Point2(x, y) for x, y in zip(x_list, y_list)]
     curve_points_closed = catmull_rom_points(points, close_loop=True)
-    return linear_extrude(10)(polygon(curve_points_closed))
+    return linear_extrude(height)(polygon(curve_points_closed))
 
 
-def make_trochoid_outer(r, teeth):
+def make_trochoid_outer(r, teeth, height):
     thetas = np.arange(0, 2 * np.pi, 2 * np.pi / 200)
     x_list, y_list = np.array([trochoid(theta, r, teeth)
                                for theta in thetas]).transpose()
     points = [Point2(x, y) for x, y in zip(x_list, y_list)]
     curve_points_closed = catmull_rom_points(points, close_loop=True)
-    outer = cylinder(r=r+10, h=10, segments=200)
+    outer = cylinder(r=r+10, h=height, segments=200)
     inner = translate([0, 0, -1])(
-        linear_extrude(12)(
+        linear_extrude(height+2)(
             polygon(curve_points_closed)
         ))
     return outer - hole()(inner)
 
 
-def plot(outer_r, out_teeth):
+def plot(outer_r, out_teeth, inner_r):
     tooth_h = outer_r / (out_teeth * 2)
-    inner_r = outer_r - (tooth_h * 2)
+    # inner_r = outer_r - (tooth_h * 2)
 
     thetas = np.arange(0, 2 * np.pi + 1, 2 * np.pi / 200)
     outer_x, outer_y = np.array([trochoid(theta, outer_r, out_teeth)
@@ -74,12 +74,13 @@ def plot(outer_r, out_teeth):
 def make_model():
     outer_r = 20
     out_teeth = 7
-    plot(outer_r, out_teeth)
     tooth_h = outer_r / (out_teeth * 2)
-    inner_r = outer_r - (tooth_h * 2)
+    inner_r = outer_r - (tooth_h * 2) - 0.2
+    plot(outer_r, out_teeth, inner_r)
 
-    inner = make_trochoid_gear(inner_r, out_teeth - 1)
-    outer = make_trochoid_outer(outer_r, out_teeth)
+    height = 20
+    inner = make_trochoid_gear(inner_r, out_teeth - 1, height)
+    outer = make_trochoid_outer(outer_r, out_teeth, height)
 
     return translate([2*outer_r+20, 0, 0])(inner) + outer
 
